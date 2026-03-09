@@ -3,9 +3,16 @@ public class Rue {
   double distance;
   String nom;
 
-  public Rue(double distance, String nom) {
+  Localisation destination;
+
+  public Rue(Localisation destination, double distance, String nom) {
+    this.destination = destination;
     this.distance = distance;
     this.nom = nom;
+  }
+
+  public Localisation getDestination() {
+    return destination;
   }
 
   public double getDistance() {
