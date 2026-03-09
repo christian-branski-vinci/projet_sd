@@ -1,4 +1,5 @@
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Graph {
@@ -10,6 +11,8 @@ public class Graph {
     Map<Rue, Localisation> mapOrigineArrivee;
     public Graph(String localisations, String roads)  {
         //TODO
+        mapRueAdjacentes = new HashMap<>();
+        mapOrigineArrivee = new HashMap<>();
     }
 
     public Localisation[] determinerZoneInondee(long[] idsOrigin,double epsilon) {
