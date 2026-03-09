@@ -12,12 +12,9 @@ public class Graph {
 
     public Graph(String localisations, String roads)  {
         //TODO
-<<<<<<< HEAD
-
-=======
         mapRueAdjacentes = new HashMap<>();
         mapOrigineArrivee = new HashMap<>();
->>>>>>> 65a0e28d02c2e3c377b264e6f317cef9866493f5
+
     }
 
     public Localisation[] determinerZoneInondee(long[] idsOrigin,double epsilon) {
