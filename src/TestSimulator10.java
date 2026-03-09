@@ -3,7 +3,7 @@ import java.time.LocalTime;
 import java.util.Deque;
 import java.util.Map;
 
-public class TestSimulator10 {
+public class    TestSimulator10 {
     public static void main(String[] args) {
         System.out.println("---------------------------------------------------------------");
         LocalTime start = LocalTime.now() ;

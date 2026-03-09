@@ -6,12 +6,15 @@ public class Graph {
 	//ATTRIBUT ?
 	//TODO
 
+    Map<Localisation, Rue> mapRueAdjacentes;
+    Map<Rue, Localisation> mapOrigineArrivee;
     public Graph(String localisations, String roads)  {
         //TODO
     }
 
     public Localisation[] determinerZoneInondee(long[] idsOrigin,double epsilon) {
         //TODO
+
 		return null ;
     }
 
