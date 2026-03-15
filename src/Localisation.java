@@ -1,12 +1,12 @@
 public class Localisation {
 
   Long id;
-  Long latitude;
-  Long longitude;
+  double latitude;
+  double longitude;
   String nom;
   double altitude;
 
-  public Localisation(Long id, Long latitude, Long longitude, String nom, double altitude) {
+  public Localisation(Long id, double latitude, double longitude, String nom, double altitude) {
     this.id = id;
     this.latitude = latitude;
     this.longitude = longitude;
@@ -22,7 +22,7 @@ public class Localisation {
     this.id = id;
   }
 
-  public Long getLatitude() {
+  public double getLatitude() {
     return latitude;
   }
 
@@ -30,7 +30,7 @@ public class Localisation {
     this.latitude = latitude;
   }
 
-  public Long getLongitude() {
+  public double getLongitude() {
     return longitude;
   }
 
