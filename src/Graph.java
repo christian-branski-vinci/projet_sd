@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class Graph {
@@ -28,7 +29,7 @@ public class Graph {
                 mapLocalisations.put(id, loc);
                 mapRueAdjacentes.put(id, new ArrayList<>());
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Erreur lors de la lecture du fichier de localisations : " + localisations, e);
         }
 
@@ -46,7 +47,7 @@ public class Graph {
                 Rue rue = new Rue(dist, nom, origine, arrivee);
                 mapRueAdjacentes.get(idOrigine).add(rue);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Erreur lors de la lecture du fichier des routes : " + roads, e);
         }
     }
@@ -82,7 +83,12 @@ public class Graph {
 
     public Deque<Localisation> trouverCheminDEvacuationLePlusCourt(long idOrigin, long idEvacuation, double vVehicule, Map<Localisation,Double> tFlood) {
         //TODO
+
 		return null ;
+    }
+
+    private void trouverCheminDEvacuationLePlusCourtBis(long idOrigin,long idArrive,double vVehicule,Map<Localisation,Double> tFlood){
+
     }
 
 
