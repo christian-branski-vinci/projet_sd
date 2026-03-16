@@ -65,8 +65,29 @@ public class Graph {
     }
 
     public Deque<Localisation> trouverCheminLePlusCourtPourContournerLaZoneInondee(long idOrigin, long idDestination, Localisation[] floodedZone) {
-		//TODO
-        return null ;
+
+        HashSet flooded = new HashSet<Long>();
+        for (int i = 0; i < floodedZone.length; i++) {
+            flooded.add(floodedZone[i].id);
+        }
+
+        Localisation o = mapLocalisations.get(idOrigin);
+        Localisation d = mapLocalisations.get(idDestination);
+
+        if (flooded.contains(o.id)){
+            return null;
+        }
+        if(flooded.contains(d.id)){
+            return null;
+        }
+        Set<Long> visited = new HashSet<Long>();
+        Deque<Localisation> path = new LinkedList<Localisation>();
+
+
+
+
+
+        return path;
     }
 
     public Map<Localisation,Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
