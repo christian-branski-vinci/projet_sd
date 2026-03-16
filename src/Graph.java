@@ -71,7 +71,16 @@ public class Graph {
 
     public Map<Localisation,Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
         //TODO
-        return null ;
+        Map<Localisation, Double> chronologie = new HashMap<>();
+        for (int i = 0; i < idsOrigin.length; i++) {
+            determinerChronologieDeLaCrueBis(idsOrigin[i], vWaterInit, k, chronologie);
+        }
+
+        return chronologie;
+    }
+
+    public void determinerChronologieDeLaCrueBis(long idOrigin, double vWaterInit, double k, Map<Localisation, Double> map){
+
     }
 
     public Deque<Localisation> trouverCheminDEvacuationLePlusCourt(long idOrigin, long idEvacuation, double vVehicule, Map<Localisation,Double> tFlood) {
