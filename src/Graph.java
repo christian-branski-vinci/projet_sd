@@ -66,7 +66,7 @@ public class Graph {
 
     public Deque<Localisation> trouverCheminLePlusCourtPourContournerLaZoneInondee(long idOrigin, long idDestination, Localisation[] floodedZone) {
 
-        HashSet flooded = new HashSet<Long>();
+        Set<Long> flooded = new HashSet<Long>();
         for (int i = 0; i < floodedZone.length; i++) {
             flooded.add(floodedZone[i].id);
         }
@@ -81,12 +81,48 @@ public class Graph {
             return null;
         }
         Set<Long> visited = new HashSet<Long>();
-        Deque<Localisation> path = new LinkedList<Localisation>();
+        Queue<Localisation> queue = new LinkedList<Localisation>();
+        Map<Long , Localisation> pathHistory = new HashMap<>();
+
+        queue.add(o);
+        visited.add(idOrigin);
+        pathHistory.put(idOrigin , null);
 
 
+        while (!queue.isEmpty()) {
+//            List<Rue> aAjouter = mapRueAdjacentes.get(path.pop().id);
+            Localisation c = queue.poll();
+            if(c.id == idDestination){
+                break;
+            }
+            List<Rue> adjacentes = mapRueAdjacentes.get(c.id);
+            for (Rue rue : adjacentes) {
+                Localisation acoute = rue.arrivee;
 
-
-
+//                if (!rue.arrivee.equals(d) || !flooded.contains(rue.arrivee)) {
+//                    path.add(rue.arrivee);
+//                }
+                if(visited.contains(acoute.id)){
+                    continue;
+                }
+                if(flooded.contains(acoute.id)){
+                    continue;
+                }
+                visited.add(acoute.id);
+                pathHistory.put(acoute.id , c);
+                queue.add(acoute);
+            }
+        }
+        if(!pathHistory.containsKey(idDestination)){
+            return null;
+        }
+        Deque<Localisation> path = new LinkedList<>();
+        Localisation etap = d;
+        //barmigardim to map ke jahatesho baraks konim baraye har child parent esho bar migardonim
+        while (etap != null){
+            path.addFirst(etap);
+            etap = pathHistory.get(etap.id);
+        }
         return path;
     }
 
