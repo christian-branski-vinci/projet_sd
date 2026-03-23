@@ -133,44 +133,78 @@ public class Graph {
         return path;
     }
 
-    public Map<Localisation,Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
-        //TODO
+    public Map<Localisation, Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
+        Map<Long, Double> distMap = new HashMap<>();
+        Map<Long, Double> vitesseMap = new HashMap<>();
+        Map<Long, Long> predecesseur = new HashMap<>();
         Map<Localisation, Double> chronologie = new HashMap<>();
-        for (int i = 0; i < idsOrigin.length; i++) {
+        Set<Long> visites = new HashSet<>();
 
-            determinerChronologieDeLaCrueBis(idsOrigin[i], vWaterInit, k, chronologie);
+        TreeSet<long[]> pq = new TreeSet<>((a, b) -> {
+            int cmp = Double.compare(a[1], b[1]);
+            if (cmp != 0) return cmp;
+            return Long.compare((long) a[0], b[0]);
+        });
+
+        //Init
+        for (long id : idsOrigin) {
+            distMap.put(id, 0.0);
+            vitesseMap.put(id, vWaterInit);
+            chronologie.put(mapLocalisations.get(id), 0.0);
+            predecesseur.put(id, -1L);
+            pq.add(new long[]{id, Double.doubleToLongBits(0.0)});
         }
 
-        return chronologie;
-    }
+        //Djikstra
+        while (!pq.isEmpty()) {
+            long[] entry = pq.first();
+            pq.remove(entry);
+            long idCourant = entry[0];
+            double tCourant = Double.longBitsToDouble(entry[1]);
 
-    public void determinerChronologieDeLaCrueBis(long idOrigin, double vWaterInit, double k, Map<Localisation, Double> map){
-        Localisation localisationOrigin = mapLocalisations.get(idOrigin);
-        if (map.containsKey(localisationOrigin)){
-            return;
-        }
-        List<Rue> list = mapRueAdjacentes.get(idOrigin);
-        double temps = Double.MAX_VALUE;
-        Localisation localisationTempsDest= new Localisation(null,0,0,null,0);
-        double vitesse= 0;
-        for (Rue rue : list) {
-            Localisation localisationDest = mapLocalisations.get(rue.arrivee.getId());
-            double pente = (localisationOrigin.getAltitude() - localisationDest.getAltitude())/rue.getDistance();
-            double vitesseEau= vWaterInit + (k * pente);
-            double tempsRue = rue.getDistance()/vitesseEau;
-            if (tempsRue<temps){
-                temps= tempsRue;
-                localisationTempsDest= localisationDest;
-                vitesse= vitesseEau;
+            //Vérification si un noeud finalisé n'est pas retraité
+            if (!visites.add(idCourant)) continue;
+
+            double vCourant = vitesseMap.get(idCourant);
+            Localisation locCourant = mapLocalisations.get(idCourant);
+
+            for (Rue rue : mapRueAdjacentes.get(idCourant)) {
+                Localisation locArrivee = rue.getArrivee();
+                long idArrivee = locArrivee.getId();
+
+                if (visites.contains(idArrivee)) continue;
+
+                double pente = (locCourant.getAltitude() - locArrivee.getAltitude()) / rue.getDistance();
+                double vArrivee = vCourant + (k * pente);
+
+                //Vérification si idArrivee est finalisé
+                if (vArrivee <= 0) continue;
+
+                double tArrivee = tCourant + rue.getDistance() / vArrivee;
+
+                //Mise à jour voir si le chemin trouvé est meilleur
+                if (tArrivee < distMap.getOrDefault(idArrivee, Double.MAX_VALUE)) {
+                    // Retirer l'entrée avant maj
+                    double tAncien = distMap.getOrDefault(idArrivee, Double.MAX_VALUE);
+                    pq.removeIf(e -> e[0] == idArrivee && Double.longBitsToDouble(e[1]) == tAncien);
+
+                    distMap.put(idArrivee, tArrivee);
+                    vitesseMap.put(idArrivee, vArrivee);
+                    chronologie.put(locArrivee, tArrivee);
+                    predecesseur.put(idArrivee, idCourant);
+                    pq.add(new long[]{idArrivee, Double.doubleToLongBits(tArrivee)});
+                }
             }
         }
-        if (localisationTempsDest.getId()==null){
-            return;
-        }
-        map.put(localisationOrigin, temps);
-        determinerChronologieDeLaCrueBis(localisationTempsDest.getId(), vitesse,k , map);
 
+        Map<Localisation, Double> resultat = new LinkedHashMap<>();
+        chronologie.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue())
+            .forEach(e -> resultat.put(e.getKey(), e.getValue()));
+
+        return resultat;
     }
+
 
     public Deque<Localisation> trouverCheminDEvacuationLePlusCourt(long idOrigin, long idEvacuation, double vVehicule, Map<Localisation,Double> tFlood) {
         //TODO
