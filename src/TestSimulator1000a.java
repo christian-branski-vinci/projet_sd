@@ -9,7 +9,7 @@ public class TestSimulator1000a {
         double k = 0.05 ;
         System.out.println("---------------------------------------------------------------");
         LocalTime start = LocalTime.now() ;
-        Graph graph = new Graph("nodes_1000.csv","edges_1000.csv");
+        Graph graph = new Graph("./projet_sd/nodes_1000.csv","./projet_sd/edges_1000.csv");
         LocalTime graphReady = LocalTime.now() ;
         Duration d = Duration.between(start,graphReady) ;
         System.out.println();

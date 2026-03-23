@@ -78,21 +78,21 @@ public class Graph {
             flooded.add(floodedZone[i].id);
         }
 
-        Localisation o = mapLocalisations.get(idOrigin);
-        Localisation d = mapLocalisations.get(idDestination);
+        Localisation localisationOrig = mapLocalisations.get(idOrigin);
+        Localisation localisationDest = mapLocalisations.get(idDestination);
 
-        if (flooded.contains(o.id)){
+        if (flooded.contains(localisationOrig.id)){
             return null;
         }
-        if(flooded.contains(d.id)){
+        if(flooded.contains(localisationDest.id)){
             return null;
         }
-        Set<Long> visited = new HashSet<Long>();
+        Set<Long> visite = new HashSet<Long>();
         Queue<Localisation> queue = new LinkedList<Localisation>();
         Map<Long , Localisation> pathHistory = new HashMap<>();
 
-        queue.add(o);
-        visited.add(idOrigin);
+        queue.add(localisationOrig);
+        visite.add(idOrigin);
         pathHistory.put(idOrigin , null);
 
 
@@ -109,13 +109,13 @@ public class Graph {
 //                if (!rue.arrivee.equals(d) || !flooded.contains(rue.arrivee)) {
 //                    path.add(rue.arrivee);
 //                }
-                if(visited.contains(acoute.id)){
+                if(visite.contains(acoute.id)){
                     continue;
                 }
                 if(flooded.contains(acoute.id)){
                     continue;
                 }
-                visited.add(acoute.id);
+                visite.add(acoute.id);
                 pathHistory.put(acoute.id , c);
                 queue.add(acoute);
             }
@@ -124,7 +124,7 @@ public class Graph {
             return null;
         }
         Deque<Localisation> path = new LinkedList<>();
-        Localisation etap = d;
+        Localisation etap = localisationDest;
         //barmigardim to map ke jahatesho baraks konim baraye har child parent esho bar migardonim
         while (etap != null){
             path.addFirst(etap);
@@ -133,49 +133,64 @@ public class Graph {
         return path;
     }
 
-    public Map<Localisation,Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
-        //TODO
-        Map<Localisation, Double> chronologie = new HashMap<>();
-        for (int i = 0; i < idsOrigin.length; i++) {
+    public Map<Localisation, Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
+        Map<Long, Double> distMap= new HashMap<>();
+        Map<Long, Double> vitesseMap =new HashMap<>();
+        Map<Localisation, Double> chronologie= new HashMap<>();
 
-            determinerChronologieDeLaCrueBis(idsOrigin[i], vWaterInit, k, chronologie);
+        PriorityQueue<double[]> pq =new PriorityQueue<>(
+            Comparator.comparingDouble(a -> a[1])
+        );
+
+        for (long id : idsOrigin) {
+            distMap.put(id, 0.0);
+            vitesseMap.put(id, vWaterInit);
+            chronologie.put(mapLocalisations.get(id), 0.0);
+            pq.offer(new double[]{id, 0.0});
         }
 
-        return chronologie;
-    }
+        while (!pq.isEmpty()) {
+            double[] entry = pq.poll();
+            long idCourant = (long) entry[0];
+            double tCourant = entry[1];
 
-    public void determinerChronologieDeLaCrueBis(long idOrigin, double vWaterInit, double k, Map<Localisation, Double> map){
-        Localisation localisationOrigin = mapLocalisations.get(idOrigin);
-        if (map.containsKey(localisationOrigin)){
-            return;
-        }
-        List<Rue> list = mapRueAdjacentes.get(idOrigin);
-        double temps = Double.MAX_VALUE;
-        Localisation localisationTempsDest= new Localisation(null,0,0,null,0);
-        double vitesse= 0;
-        for (Rue rue : list) {
-            Localisation localisationDest = mapLocalisations.get(rue.arrivee.getId());
-            double pente = (localisationOrigin.getAltitude() - localisationDest.getAltitude())/rue.getDistance();
-            double vitesseEau= vWaterInit + (k * pente);
-            double tempsRue = rue.getDistance()/vitesseEau;
-            if (tempsRue<temps){
-                temps= tempsRue;
-                localisationTempsDest= localisationDest;
-                vitesse= vitesseEau;
+            if (tCourant > distMap.getOrDefault(idCourant, Double.MAX_VALUE)) continue;
+
+            double vCourant  = vitesseMap.get(idCourant);
+            Localisation locCourant = mapLocalisations.get(idCourant);
+
+            for (Rue rue : mapRueAdjacentes.get(idCourant)) {
+                Localisation locArrivee = rue.getArrivee();
+                long idArrivee = locArrivee.getId();
+                double pente = (locCourant.getAltitude() - locArrivee.getAltitude()) / rue.getDistance();
+                double vArrivee = vCourant + k * pente;
+
+                if (vArrivee <= 0) continue;
+
+                double tArrivee = tCourant + rue.getDistance() / vArrivee;
+
+                if (tArrivee < distMap.getOrDefault(idArrivee, Double.MAX_VALUE)) {
+                    distMap.put(idArrivee, tArrivee);
+                    vitesseMap.put(idArrivee, vArrivee);
+                    chronologie.put(locArrivee, tArrivee);
+                    pq.offer(new double[]{idArrivee, tArrivee});
+                }
             }
         }
-        if (localisationTempsDest.getId()==null){
-            return;
-        }
-        map.put(localisationOrigin, temps);
-        determinerChronologieDeLaCrueBis(localisationTempsDest.getId(), vitesse,k , map);
 
+        Map<Localisation, Double> resultat = new LinkedHashMap<>();
+        chronologie.entrySet().stream()
+            .sorted(Map.Entry.comparingByValue())
+            .forEach(e -> resultat.put(e.getKey(), e.getValue()));
+
+        return resultat;
     }
 
     public Deque<Localisation> trouverCheminDEvacuationLePlusCourt(long idOrigin, long idEvacuation, double vVehicule, Map<Localisation,Double> tFlood) {
         //TODO
-		return null ;
+        return null ;
     }
+
 
 
 }
