@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class Graph {
@@ -28,7 +29,7 @@ public class Graph {
                 mapLocalisations.put(id, loc);
                 mapRueAdjacentes.put(id, new ArrayList<>());
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Erreur lors de la lecture du fichier de localisations : " + localisations, e);
         }
 
@@ -46,7 +47,7 @@ public class Graph {
                 Rue rue = new Rue(dist, nom, origine, arrivee);
                 mapRueAdjacentes.get(idOrigine).add(rue);
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Erreur lors de la lecture du fichier des routes : " + roads, e);
         }
     }
@@ -72,13 +73,15 @@ public class Graph {
 
     public Deque<Localisation> trouverCheminLePlusCourtPourContournerLaZoneInondee(long idOrigin, long idDestination, Localisation[] floodedZone) {
 		//TODO
-        return null ;
+        Deque<Localisation> deque = new ArrayDeque<>();
+        return deque ;
     }
 
     public Map<Localisation,Double> determinerChronologieDeLaCrue(long[] idsOrigin, double vWaterInit, double k) {
         //TODO
         Map<Localisation, Double> chronologie = new HashMap<>();
         for (int i = 0; i < idsOrigin.length; i++) {
+
             determinerChronologieDeLaCrueBis(idsOrigin[i], vWaterInit, k, chronologie);
         }
 
@@ -86,6 +89,30 @@ public class Graph {
     }
 
     public void determinerChronologieDeLaCrueBis(long idOrigin, double vWaterInit, double k, Map<Localisation, Double> map){
+        Localisation localisationOrigin = mapLocalisations.get(idOrigin);
+        if (map.containsKey(localisationOrigin)){
+            return;
+        }
+        List<Rue> list = mapRueAdjacentes.get(idOrigin);
+        double temps = Double.MAX_VALUE;
+        Localisation localisationTempsDest= new Localisation(null,0,0,null,0);
+        double vitesse= 0;
+        for (Rue rue : list) {
+            Localisation localisationDest = mapLocalisations.get(rue.arrivee.getId());
+            double pente = (localisationOrigin.getAltitude() - localisationDest.getAltitude())/rue.getDistance();
+            double vitesseEau= vWaterInit + (k * pente);
+            double tempsRue = rue.getDistance()/vitesseEau;
+            if (tempsRue<temps){
+                temps= tempsRue;
+                localisationTempsDest= localisationDest;
+                vitesse= vitesseEau;
+            }
+        }
+        if (localisationTempsDest.getId()==null){
+            return;
+        }
+        map.put(localisationOrigin, temps);
+        determinerChronologieDeLaCrueBis(localisationTempsDest.getId(), vitesse,k , map);
 
     }
 
